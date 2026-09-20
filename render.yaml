@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: library-management-system
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: LOAN_DURATION_DAYS
+        value: 14
+      - key: MAX_ACTIVE_LOANS
+        value: 5
+      - key: DAILY_FINE_RATE
+        value: 5

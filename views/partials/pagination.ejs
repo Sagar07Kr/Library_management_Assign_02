@@ -1,0 +1,59 @@
+<% if (typeof pagination !== 'undefined' && pagination && pagination.pages > 1) { %>
+  <%
+    const currentParams = typeof query !== 'undefined' ? query : {};
+    const getPageUrl = (pageNum) => {
+      const p = { ...currentParams, page: pageNum };
+      Object.keys(p).forEach(k => { if (!p[k] || p[k] === '') delete p[k]; });
+      return '?' + new URLSearchParams(p).toString();
+    };
+  %>
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      <!-- Previous button -->
+      <li class="page-item <%= !pagination.hasPrev ? 'disabled' : '' %>">
+        <a class="page-link" href="<%= pagination.hasPrev ? getPageUrl(pagination.page - 1) : '#' %>" aria-label="Previous page">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+      </li>
+
+      <!-- Page Numbers -->
+      <%
+        let startPage = Math.max(1, pagination.page - 2);
+        let endPage = Math.min(pagination.pages, pagination.page + 2);
+        if (pagination.page <= 3) endPage = Math.min(pagination.pages, 5);
+        if (pagination.page >= pagination.pages - 2) startPage = Math.max(1, pagination.pages - 4);
+      %>
+
+      <% if (startPage > 1) { %>
+        <li class="page-item"><a class="page-link" href="<%= getPageUrl(1) %>">1</a></li>
+        <% if (startPage > 2) { %>
+          <li class="page-item disabled"><span class="page-link" style="border:none; background:transparent;">…</span></li>
+        <% } %>
+      <% } %>
+
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+          <a class="page-link" href="<%= getPageUrl(i) %>" <%= i === pagination.page ? 'aria-current="page"' : '' %>><%= i %></a>
+        </li>
+      <% } %>
+
+      <% if (endPage < pagination.pages) { %>
+        <% if (endPage < pagination.pages - 1) { %>
+          <li class="page-item disabled"><span class="page-link" style="border:none; background:transparent;">…</span></li>
+        <% } %>
+        <li class="page-item"><a class="page-link" href="<%= getPageUrl(pagination.pages) %>"><%= pagination.pages %></a></li>
+      <% } %>
+
+      <!-- Next button -->
+      <li class="page-item <%= !pagination.hasNext ? 'disabled' : '' %>">
+        <a class="page-link" href="<%= pagination.hasNext ? getPageUrl(pagination.page + 1) : '#' %>" aria-label="Next page">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </nav>
+<% } %>

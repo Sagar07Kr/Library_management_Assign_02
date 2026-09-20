@@ -1,0 +1,308 @@
+<%
+  const statuses = ['ALL', 'PENDING', 'ISSUED', 'OVERDUE', 'RETURNED', 'REJECTED'];
+%>
+
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/admin">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <span>Admin Console</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page">Loan Management</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-6);">
+    <div>
+      <h1 style="font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;">Circulation Desk & Loans</h1>
+      <p style="color: var(--text-muted); font-size: var(--text-base);">
+        Process physical book returns, calculate overdue fines, and monitor lending history (<%= pagination.total %> total records).
+      </p>
+    </div>
+    <div>
+      <a href="/admin/requests" class="btn btn-primary btn-md">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <span>Pending Requests Queue</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="tabs" role="tablist">
+    <% statuses.forEach(s => { %>
+      <a
+        href="/admin/loans?status=<%= s %>"
+        class="tab-link <%= filters.status === s ? 'active' : '' %>"
+        id="tab-<%= s.toLowerCase() %>"
+        role="tab"
+        aria-selected="<%= filters.status === s ? 'true' : 'false' %>"
+      >
+        <span><%= s === 'ALL' ? 'All Records' : s.charAt(0) + s.slice(1).toLowerCase() %></span>
+      </a>
+    <% }) %>
+  </div>
+
+  <!-- Loans Table -->
+  <% if (loans.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-state-icon" aria-hidden="true">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <h2 class="empty-state-title">No loan records in this view</h2>
+      <p class="empty-state-desc">No records found matching the status filter "<%= filters.status %>".</p>
+      <a href="/admin/loans?status=ALL" class="btn btn-secondary btn-md">View All Loans</a>
+    </div>
+  <% } else { %>
+    <div class="card" style="overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Member</th>
+              <th scope="col">Book Title</th>
+              <th scope="col">Issue Date</th>
+              <th scope="col">Due Date</th>
+              <th scope="col">Returned At</th>
+              <th scope="col">Status</th>
+              <th scope="col">Fine</th>
+              <th scope="col" style="text-align: right;">Circulation Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% loans.forEach(loan => { %>
+              <%
+                const isOverdue = loan.status === 'OVERDUE';
+                let badgeClass = 'badge-primary';
+                if (loan.status === 'RETURNED') badgeClass = 'badge-success';
+                else if (loan.status === 'OVERDUE') badgeClass = 'badge-danger';
+                else if (loan.status === 'PENDING') badgeClass = 'badge-warning';
+                else if (loan.status === 'REJECTED' || loan.status === 'CANCELLED') badgeClass = 'badge-secondary';
+
+                const memberName = loan.member ? loan.member.fullName : 'Member';
+                const bookTitle = loan.book ? loan.book.title : 'Book';
+                const dueDateFormatted = loan.dueDate ? (typeof h !== 'undefined' ? h.formatDate(loan.dueDate) : new Date(loan.dueDate).toLocaleDateString()) : 'N/A';
+                const daysLate = loan.daysOverdue || 0;
+                const fineVal = loan.fineAmount || loan.calculatedFine || 0;
+              %>
+              <tr id="loan-row-<%= loan._id %>">
+                <!-- Member info -->
+                <td>
+                  <div>
+                    <p style="font-size: var(--text-sm); font-weight: 600; color: var(--text); margin: 0;">
+                      <%= loan.member ? loan.member.fullName : 'Unknown Member' %>
+                    </p>
+                    <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;"><%= loan.member ? loan.member.email : '' %></p>
+                  </div>
+                </td>
+
+                <!-- Book info -->
+                <td>
+                  <p style="font-size: var(--text-sm); font-weight: 600; color: var(--text); margin: 0; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <% if (loan.book) { %>
+                      <a href="/books/<%= loan.book._id %>"><%= loan.book.title %></a>
+                    <% } else { %>
+                      Archived Book
+                    <% } %>
+                  </p>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;"><%= loan.book ? loan.book.author : '' %></p>
+                </td>
+
+                <!-- Dates -->
+                <td style="font-size: var(--text-xs);">
+                  <%= loan.issuedAt ? (typeof h !== 'undefined' ? h.formatDate(loan.issuedAt) : new Date(loan.issuedAt).toLocaleDateString()) : 'Pending Issue' %>
+                </td>
+                <td style="font-size: var(--text-xs); <%= isOverdue ? 'color: var(--danger); font-weight: 700;' : '' %>">
+                  <%= loan.dueDate ? (typeof h !== 'undefined' ? h.formatDate(loan.dueDate) : new Date(loan.dueDate).toLocaleDateString()) : '—' %>
+                </td>
+                <td style="font-size: var(--text-xs);">
+                  <%= loan.returnedAt ? (typeof h !== 'undefined' ? h.formatDate(loan.returnedAt) : new Date(loan.returnedAt).toLocaleDateString()) : '—' %>
+                </td>
+
+                <!-- Status Badge -->
+                <td>
+                  <span class="badge <%= badgeClass %>">
+                    <span class="badge-dot"></span> <%= loan.status %>
+                  </span>
+                  <% if (loan.daysOverdue > 0 && loan.status !== 'RETURNED') { %>
+                    <p style="font-size: 11px; color: var(--danger); margin: 2px 0 0; font-weight: 600;">
+                      <%= loan.daysOverdue %> days late
+                    </p>
+                  <% } %>
+                </td>
+
+                <!-- Fine Calculation -->
+                <td>
+                  <% if (loan.fineAmount > 0 || loan.calculatedFine > 0) { %>
+                    <span style="color: var(--danger); font-weight: 700; font-size: var(--text-sm);">
+                      ₹<%= loan.fineAmount || loan.calculatedFine %>
+                    </span>
+                  <% } else { %>
+                    <span style="color: var(--text-muted);">₹0</span>
+                  <% } %>
+                </td>
+
+                <!-- Action button -->
+                <td style="text-align: right;">
+                  <% if (loan.status === 'ISSUED' || loan.status === 'OVERDUE') { %>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm btn-open-return-modal"
+                      id="admin-return-<%= loan._id %>"
+                      data-id="<%= loan._id %>"
+                      data-member="<%= memberName %>"
+                      data-book="<%= bookTitle %>"
+                      data-due="<%= dueDateFormatted %>"
+                      data-days="<%= daysLate %>"
+                      data-fine="<%= fineVal %>"
+                    >
+                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Process Return</span>
+                    </button>
+                  <% } else if (loan.status === 'PENDING') { %>
+                    <a href="/admin/requests" class="btn btn-secondary btn-sm">
+                      <span>Review Request</span>
+                    </a>
+                  <% } else { %>
+                    <span style="color: var(--text-muted); font-size: var(--text-xs);">Completed</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <% if (pagination && pagination.totalPages > 1) { %>
+      <%
+        const paginationData = {
+          page: pagination.page,
+          pages: pagination.totalPages,
+          hasPrev: pagination.page > 1,
+          hasNext: pagination.page < pagination.totalPages,
+        };
+        const queryData = {
+          status: filters.status || 'ALL',
+        };
+      %>
+      <%- include('../partials/pagination', { pagination: paginationData, query: queryData }) %>
+    <% } %>
+  <% } %>
+</div>
+
+<!-- Return Confirmation Modal (Section 11 Requirement) -->
+<div id="return-modal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 999; align-items: center; justify-content: center;">
+  <div class="card" style="width: 100%; max-width: 500px; margin: var(--space-4); padding: var(--space-6); background: var(--surface); box-shadow: var(--shadow-xl); border: 1px solid var(--border);">
+    <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+      <div style="width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h3 style="font-size: var(--text-lg); font-weight: 800; color: var(--text); margin: 0;">Confirm Physical Book Return</h3>
+        <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 2px 0 0;">Librarian return verification and fine calculation</p>
+      </div>
+    </div>
+
+    <!-- Return Details Box -->
+    <div style="background-color: var(--surface-2); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3); font-size: var(--text-sm);">
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-muted);">Member:</span>
+        <strong style="color: var(--text);" id="modal-member-name">—</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-muted);">Book:</span>
+        <strong style="color: var(--text); max-width: 250px; text-align: right;" id="modal-book-title">—</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-muted);">Due Date:</span>
+        <span id="modal-due-date">—</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-muted);">Return Date:</span>
+        <strong style="color: var(--text);"><%= new Date().toLocaleDateString() %> (Today)</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; border-top: 1px dashed var(--border); padding-top: var(--space-2);">
+        <span style="color: var(--text-muted);">Days Overdue:</span>
+        <span id="modal-days-overdue" style="font-weight: 600;">0 days</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: var(--space-3);">
+        <span style="font-weight: 700; color: var(--text);">Overdue Fine:</span>
+        <strong style="font-size: var(--text-lg);" id="modal-fine-amount">₹0</strong>
+      </div>
+    </div>
+
+    <form id="return-form" method="POST">
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3);">
+        <button type="button" class="btn btn-ghost btn-md" id="close-return-modal-btn">
+          <span>Cancel</span>
+        </button>
+        <button type="submit" class="btn btn-primary btn-md" id="confirm-return-btn">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Confirm Return</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('return-modal');
+    const form = document.getElementById('return-form');
+    const closeBtn = document.getElementById('close-return-modal-btn');
+
+    document.querySelectorAll('.btn-open-return-modal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const loanId = btn.getAttribute('data-id');
+        const memberName = btn.getAttribute('data-member');
+        const bookTitle = btn.getAttribute('data-book');
+        const dueDate = btn.getAttribute('data-due');
+        const daysOverdue = parseInt(btn.getAttribute('data-days') || '0', 10);
+        const fine = btn.getAttribute('data-fine') || '0';
+
+        form.action = '/admin/loans/' + loanId + '/return';
+        document.getElementById('modal-member-name').textContent = memberName;
+        document.getElementById('modal-book-title').textContent = bookTitle;
+        document.getElementById('modal-due-date').textContent = dueDate;
+
+        const daysEl = document.getElementById('modal-days-overdue');
+        const fineEl = document.getElementById('modal-fine-amount');
+
+        if (daysOverdue > 0) {
+          daysEl.textContent = daysOverdue + (daysOverdue > 1 ? ' days late' : ' day late');
+          daysEl.style.color = 'var(--danger)';
+          fineEl.textContent = '₹' + fine;
+          fineEl.style.color = 'var(--danger)';
+        } else {
+          daysEl.textContent = '0 days (On Time)';
+          daysEl.style.color = 'var(--success)';
+          fineEl.textContent = '₹0';
+          fineEl.style.color = 'var(--text)';
+        }
+
+        modal.style.display = 'flex';
+      });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+  });
+</script>

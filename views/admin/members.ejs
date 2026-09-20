@@ -1,0 +1,145 @@
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/admin">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <span>Admin Console</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page">Member Management</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-6);">
+    <div>
+      <h1 style="font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;">Member Directory</h1>
+      <p style="color: var(--text-muted); font-size: var(--text-base);">
+        Monitor registered library users, active loans, and account statuses (<%= pagination.total %> total members).
+      </p>
+    </div>
+  </div>
+
+  <!-- Search & Filters Toolbar -->
+  <form action="/admin/members" method="GET" class="card" style="padding: var(--space-4); margin-bottom: var(--space-6);">
+    <div style="display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;">
+      <!-- Search -->
+      <div class="input-wrapper" style="flex: 1; min-width: 200px;">
+        <svg class="input-icon-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="search"
+          name="search"
+          class="form-control has-icon-left"
+          placeholder="Search by member name or email address..."
+          value="<%= filters.search || '' %>"
+        >
+      </div>
+
+      <!-- Status Filter -->
+      <div style="min-width: 140px;">
+        <select name="status" class="form-control">
+          <option value="">All Status</option>
+          <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+          <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display: flex; gap: var(--space-2);">
+        <button type="submit" class="btn btn-primary btn-md">Filter</button>
+        <a href="/admin/members" class="btn btn-ghost btn-md">Reset</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- Members Data Table -->
+  <% if (members.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-state-icon" aria-hidden="true">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </div>
+      <h2 class="empty-state-title">No members found</h2>
+      <p class="empty-state-desc">No registered members matched your search criteria.</p>
+      <a href="/admin/members" class="btn btn-secondary btn-md">Clear Filters</a>
+    </div>
+  <% } else { %>
+    <div class="card" style="overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Member</th>
+              <th scope="col">Email</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Active Loans</th>
+              <th scope="col">Account Status</th>
+              <th scope="col">Member Since</th>
+              <th scope="col" style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% members.forEach(member => { %>
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    <div class="user-avatar" style="width: 34px; height: 34px; font-size: var(--text-xs);">
+                      <%= member.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) %>
+                    </div>
+                    <span style="font-weight: 600; color: var(--text); font-size: var(--text-sm);">
+                      <%= member.fullName %>
+                    </span>
+                  </div>
+                </td>
+                <td style="color: var(--text-muted); font-size: var(--text-xs);"><%= member.email %></td>
+                <td style="color: var(--text-muted); font-size: var(--text-xs);"><%= member.phone || '—' %></td>
+                <td>
+                  <span class="badge <%= member.activeLoans > 0 ? 'badge-primary' : 'badge-secondary' %>">
+                    <%= member.activeLoans %> loans
+                  </span>
+                </td>
+                <td>
+                  <span class="badge <%= member.isActive ? 'badge-success' : 'badge-danger' %>">
+                    <span class="badge-dot"></span> <%= member.isActive ? 'Active' : 'Deactivated' %>
+                  </span>
+                </td>
+                <td style="color: var(--text-muted); font-size: var(--text-xs);">
+                  <%= typeof h !== 'undefined' ? h.formatDate(member.createdAt) : new Date(member.createdAt).toLocaleDateString() %>
+                </td>
+                <td style="text-align: right;">
+                  <a href="/admin/members/<%= member._id %>" class="btn btn-ghost btn-sm" aria-label="View <%= member.fullName %> profile">
+                    <span>Details</span>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <% if (pagination.totalPages > 1) { %>
+      <%
+        const paginationData = {
+          page: pagination.page,
+          pages: pagination.totalPages,
+          hasPrev: pagination.page > 1,
+          hasNext: pagination.page < pagination.totalPages,
+        };
+        const queryData = {
+          search: filters.search || '',
+          status: filters.status || '',
+        };
+      %>
+      <%- include('../partials/pagination', { pagination: paginationData, query: queryData }) %>
+    <% } %>
+  <% } %>
+</div>

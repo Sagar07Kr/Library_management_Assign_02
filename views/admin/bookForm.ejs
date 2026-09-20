@@ -1,0 +1,213 @@
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16); max-width: 800px;">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/admin">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <span>Admin</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <a href="/admin/books">Books</a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page"><%= isEdit ? 'Edit Book' : 'Add New Book' %></span>
+  </nav>
+
+  <!-- Header -->
+  <div style="margin-bottom: var(--space-6);">
+    <h1 style="font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;">
+      <%= isEdit ? 'Edit Book Record' : 'Add New Book to Catalogue' %>
+    </h1>
+    <p style="color: var(--text-muted); font-size: var(--text-base);">
+      <%= isEdit ? 'Update metadata, inventory copy counts, and cover graphics' : 'Fill in book details to expand library inventory' %>
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-body" style="padding: var(--space-8);">
+      <!-- Error Alerts -->
+      <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="toast toast-error" style="position: static; width: 100%; margin-bottom: var(--space-6); animation: none;" role="alert">
+          <div class="toast-content">
+            <p style="font-size: var(--text-sm); font-weight: 700; margin-bottom: 4px;">Please correct the following errors:</p>
+            <ul style="list-style: none; margin: 0; padding: 0;">
+              <% errors.forEach(err => { %>
+                <li style="font-size: var(--text-xs);"><%= err.msg %></li>
+              <% }) %>
+            </ul>
+          </div>
+        </div>
+      <% } %>
+
+      <form action="<%= isEdit ? '/admin/books/' + book._id + '/update' : '/admin/books' %>" method="POST" data-loading data-validate id="book-form">
+        <!-- Title & Author -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="title">
+              <span>Book Title</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              class="form-control"
+              placeholder="e.g. Clean Architecture"
+              value="<%= values.title || '' %>"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="author">
+              <span>Author Name</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="author"
+              name="author"
+              class="form-control"
+              placeholder="e.g. Robert C. Martin"
+              value="<%= values.author || '' %>"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- ISBN & Category -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="isbn">
+              <span>ISBN Number</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="isbn"
+              name="isbn"
+              class="form-control"
+              placeholder="e.g. 978-0134494166"
+              value="<%= values.isbn || '' %>"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="category">
+              <span>Category</span>
+              <span class="required">*</span>
+            </label>
+            <select id="category" name="category" class="form-control" required>
+              <option value="">Select Domain / Category</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat %>" <%= (values.category || '') === cat ? 'selected' : '' %>><%= cat %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description / Synopsis -->
+        <div class="form-group">
+          <label class="form-label" for="description">
+            <span>Description / Overview</span>
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            class="form-control"
+            style="height: auto; min-height: 100px; padding: var(--space-3);"
+            placeholder="Brief overview of the book contents, topics covered, and target audience..."
+            rows="4"
+          ><%= values.description || '' %></textarea>
+        </div>
+
+        <!-- Publisher & Publication Year -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="publisher">
+              <span>Publisher</span>
+            </label>
+            <input
+              type="text"
+              id="publisher"
+              name="publisher"
+              class="form-control"
+              placeholder="e.g. Prentice Hall"
+              value="<%= values.publisher || '' %>"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="publicationYear">
+              <span>Publication Year</span>
+            </label>
+            <input
+              type="number"
+              id="publicationYear"
+              name="publicationYear"
+              class="form-control"
+              placeholder="e.g. 2017"
+              value="<%= values.publicationYear || '' %>"
+              min="1000"
+              max="<%= new Date().getFullYear() + 1 %>"
+            >
+          </div>
+        </div>
+
+        <!-- Cover Image URL & Live Preview -->
+        <div class="form-group">
+          <label class="form-label" for="coverImage">
+            <span>Cover Image URL</span>
+          </label>
+          <input
+            type="url"
+            id="coverImage"
+            name="coverImage"
+            class="form-control"
+            placeholder="https://example.com/cover.jpg"
+            value="<%= values.coverImage || '' %>"
+          >
+          <span class="form-hint">Paste an image URL. If left empty, an elegant placeholder cover will be automatically generated.</span>
+          <div style="margin-top: var(--space-3);">
+            <img
+              id="cover-preview"
+              src="<%= values.coverImage || '' %>"
+              alt="Cover preview"
+              style="width: 80px; height: 110px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--border); display: <%= values.coverImage ? 'block' : 'none' %>;"
+            >
+          </div>
+        </div>
+
+        <!-- Total Copies Inventory -->
+        <div class="form-group" style="max-width: 240px;">
+          <label class="form-label" for="totalCopies">
+            <span>Total Copies</span>
+            <span class="required">*</span>
+          </label>
+          <input
+            type="number"
+            id="totalCopies"
+            name="totalCopies"
+            class="form-control"
+            value="<%= values.totalCopies || '' %>"
+            required
+            min="1"
+            placeholder="e.g. 5"
+          >
+          <% if (isEdit && book) { %>
+            <span class="form-hint">Currently issued to members: <%= book.totalCopies - book.availableCopies %></span>
+          <% } %>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="margin-top: var(--space-8); display: flex; gap: var(--space-3); border-top: 1px solid var(--border); padding-top: var(--space-6);">
+          <button type="submit" class="btn btn-primary btn-md" id="book-form-submit">
+            <span><%= isEdit ? 'Save Changes' : 'Publish to Catalogue' %></span>
+          </button>
+          <a href="/admin/books" class="btn btn-secondary btn-md">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,199 @@
+<%
+  const coverUrl = book.coverImage || (typeof h !== 'undefined' && h.getPlaceholderCover ? h.getPlaceholderCover(book.title) : 'https://placehold.co/300x400/4f46e5/ffffff?text=' + encodeURIComponent(book.title.slice(0, 10)));
+  const isAvailable = book.availableCopies > 0;
+  const isLowStock = isAvailable && book.availableCopies <= 2;
+%>
+
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+      <span>Home</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <a href="/books">Catalogue</a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page"><%= book.title %></span>
+  </nav>
+
+  <!-- Book Details Split Layout -->
+  <article class="book-details-layout">
+    <!-- Left Column: Large Book Cover & Quick Status Badge -->
+    <div class="book-details-cover-wrap">
+      <div class="book-details-cover">
+        <img
+          src="<%= coverUrl %>"
+          alt="Cover art for <%= book.title %>"
+          loading="eager"
+          onerror="this.onerror=null; this.src='https://placehold.co/300x400/4f46e5/ffffff?text=Book';"
+        >
+      </div>
+
+      <!-- Live Stock Badge Pill -->
+      <div style="text-align: center; width: 100%;">
+        <% if (!isAvailable) { %>
+          <span class="badge badge-danger" style="font-size: var(--text-sm); padding: 6px 16px;">
+            <span class="badge-dot"></span> Out of Stock
+          </span>
+        <% } else if (isLowStock) { %>
+          <span class="badge badge-warning" style="font-size: var(--text-sm); padding: 6px 16px;">
+            <span class="badge-dot"></span> Only <%= book.availableCopies %> copies remaining
+          </span>
+        <% } else { %>
+          <span class="badge badge-success" style="font-size: var(--text-sm); padding: 6px 16px;">
+            <span class="badge-dot"></span> In Stock (<%= book.availableCopies %> copies available)
+          </span>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Column: Metadata, Description & Borrow Actions -->
+    <div style="display: flex; flex-direction: column;">
+      <!-- Category Tag & Title -->
+      <div style="margin-bottom: var(--space-4);">
+        <span class="badge badge-primary" style="margin-bottom: var(--space-2);"><%= book.category %></span>
+        <h1 style="font-size: clamp(1.75rem, 3.5vw, 2.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: var(--space-2);">
+          <%= book.title %>
+        </h1>
+        <p style="font-size: var(--text-lg); color: var(--text-muted);">
+          by <strong style="color: var(--text);"><%= book.author %></strong>
+        </p>
+      </div>
+
+      <!-- Rating Display -->
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4);">
+        <div style="display: flex; color: #F59E0B;" aria-label="Rating: 4.8 out of 5 stars">
+          <% for(let s=0; s<5; s++) { %>
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          <% } %>
+        </div>
+        <span style="font-size: var(--text-sm); font-weight: 700; color: var(--text);">4.8</span>
+        <span style="font-size: var(--text-sm); color: var(--text-muted);">(Verified Readers)</span>
+      </div>
+
+      <!-- Metadata Grid -->
+      <div class="book-meta-grid">
+        <div class="book-meta-item">
+          <span class="book-meta-label">ISBN-13</span>
+          <span class="book-meta-val"><%= book.isbn %></span>
+        </div>
+        <div class="book-meta-item">
+          <span class="book-meta-label">Category</span>
+          <span class="book-meta-val"><%= book.category %></span>
+        </div>
+        <div class="book-meta-item">
+          <span class="book-meta-label">Publication Year</span>
+          <span class="book-meta-val"><%= book.publicationYear || '—' %></span>
+        </div>
+        <div class="book-meta-item">
+          <span class="book-meta-label">Publisher</span>
+          <span class="book-meta-val"><%= book.publisher || 'Library Press' %></span>
+        </div>
+      </div>
+
+      <!-- Synopsis / Description -->
+      <div style="margin-bottom: var(--space-6);">
+        <h2 style="font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-2);">Synopsis & Overview</h2>
+        <p style="font-size: var(--text-base); color: var(--text-muted); line-height: 1.7;">
+          <%= book.description || 'No extended summary currently on file for this edition. All copies are maintained in excellent circulation condition.' %>
+        </p>
+      </div>
+
+      <!-- Borrowing Action Card -->
+      <div class="borrow-card" id="borrow-form">
+        <div>
+          <h3 style="font-size: var(--text-base); font-weight: 700; margin-bottom: 2px;">Circulation Desk</h3>
+          <p style="font-size: var(--text-xs); color: var(--text-muted);">
+            Standard loan period: <strong><%= typeof config !== 'undefined' ? config.loanDurationDays : 14 %> days</strong> • Daily overdue rate: ₹<%= typeof config !== 'undefined' ? config.dailyFineRate : 5 %>
+          </p>
+          <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: 4px;">
+            Requests are verified and officially issued by the librarian at the library counter.
+          </p>
+        </div>
+
+        <div>
+          <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated && !isAdmin) { %>
+            <% if (book.availableCopies > 0) { %>
+              <% if (borrowingEligibility && borrowingEligibility.eligible) { %>
+                <form action="/books/<%= book._id %>/request" method="POST" data-loading style="margin: 0;">
+                  <button type="submit" class="btn btn-primary btn-lg" id="borrow-btn">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span>Request Book</span>
+                  </button>
+                </form>
+              <% } else if (borrowingEligibility && borrowingEligibility.status === 'PENDING') { %>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <span class="badge badge-warning" style="padding: 10px 18px; font-size: var(--text-sm);">
+                    <span class="badge-dot"></span> Request Pending Approval
+                  </span>
+                  <p style="font-size: var(--text-xs); color: var(--warning); margin: 0;">Awaiting librarian approval & issue</p>
+                </div>
+              <% } else if (borrowingEligibility && borrowingEligibility.status === 'ISSUED') { %>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <span class="badge badge-info" style="padding: 10px 18px; font-size: var(--text-sm);">
+                    <span class="badge-dot"></span> Currently Borrowed By You
+                  </span>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;">Return physical copy at the library counter</p>
+                </div>
+              <% } else if (borrowingEligibility) { %>
+                <button class="btn btn-secondary btn-lg" disabled style="opacity: 0.6; cursor: not-allowed;">
+                  <span>Cannot Request</span>
+                </button>
+                <p style="font-size: var(--text-xs); color: var(--danger); margin-top: 4px;"><%= borrowingEligibility.reason %></p>
+              <% } %>
+            <% } else { %>
+              <button class="btn btn-secondary btn-lg" disabled style="opacity: 0.6; cursor: not-allowed;">
+                <span>Currently Out of Stock</span>
+              </button>
+            <% } %>
+          <% } else if (!isAuthenticated) { %>
+            <a href="/login" class="btn btn-primary btn-lg">
+              <span>Sign In to Request</span>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          <% } else if (isAdmin) { %>
+            <a href="/admin/books/<%= book._id %>/edit" class="btn btn-outline btn-lg">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span>Edit Book (Admin)</span>
+            </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Related Books Row -->
+  <% if (typeof relatedBooks !== 'undefined' && relatedBooks && relatedBooks.length > 0) { %>
+    <section aria-label="Related books">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6);">
+        <div>
+          <h2 style="font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em;">More in <%= book.category %></h2>
+          <p style="font-size: var(--text-sm); color: var(--text-muted);">Readers who checked out this title also enjoyed</p>
+        </div>
+        <a href="/books?category=<%= encodeURIComponent(book.category) %>" class="btn btn-ghost btn-sm">
+          <span>View all</span>
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid-4">
+        <% relatedBooks.forEach(related => { %>
+          <%- include('../partials/book-card', { book: related }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+</div>

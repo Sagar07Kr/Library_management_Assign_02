@@ -1,0 +1,212 @@
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/dashboard">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page">My Borrowed Books</span>
+  </nav>
+
+  <!-- Header -->
+  <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-8);">
+    <h1 style="font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;">My Borrowed Books</h1>
+    <p style="color: var(--text-muted); font-size: var(--text-base);">
+      You currently hold <strong><%= loans.length %></strong> active borrowed title<%= loans.length !== 1 ? 's' : '' %> out of your <%= typeof config !== 'undefined' ? config.maxActiveLoans : 5 %> permitted lending slots.
+    </p>
+  </div>
+
+  <!-- Physical Return Notice Banner -->
+  <div class="card" style="margin-bottom: var(--space-8); background-color: var(--primary-light); border-color: rgba(99, 102, 241, 0.25); padding: var(--space-4) var(--space-6);">
+    <div style="display: flex; gap: var(--space-4); align-items: center;">
+      <div style="width: 36px; height: 36px; border-radius: var(--radius-full); background-color: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h2 style="font-size: var(--text-sm); font-weight: 700; color: var(--primary); margin: 0;">Physical Return Policy</h2>
+        <p style="font-size: var(--text-xs); color: var(--text-secondary); margin: 2px 0 0;">
+          To return a borrowed book, please hand it over physically to the librarian at the circulation desk. The librarian will inspect the copy and record the official return in the system.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Pending Borrow Requests (if any) -->
+  <% if (typeof pendingRequests !== 'undefined' && pendingRequests.length > 0) { %>
+    <section style="margin-bottom: var(--space-10);" aria-label="Pending borrow requests">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4);">
+        <h2 style="font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.02em;">Pending Requests</h2>
+        <span class="badge badge-warning"><%= pendingRequests.length %> Awaiting Approval</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+        <% pendingRequests.forEach(req => { %>
+          <div class="card" style="padding: var(--space-4) var(--space-6); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: var(--space-4);">
+              <div class="loan-card-cover" style="width: 48px; height: 64px;">
+                <img
+                  src="<%= (req.book && req.book.coverImage) || (typeof h !== 'undefined' ? h.getPlaceholderCover(req.book ? req.book.title : 'Book') : '') %>"
+                  alt="Cover image"
+                  loading="lazy"
+                >
+              </div>
+              <div>
+                <h3 style="font-size: var(--text-base); font-weight: 700; color: var(--text); margin: 0;">
+                  <%= req.book ? req.book.title : 'Book' %>
+                </h3>
+                <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 2px 0 0;">
+                  by <%= req.book ? req.book.author : 'Unknown' %> • Requested on <%= typeof h !== 'undefined' ? h.formatDate(req.requestedAt) : new Date(req.requestedAt).toLocaleDateString() %>
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <span class="badge badge-warning">
+                <span class="badge-dot"></span> Pending Librarian Approval
+              </span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">
+                Visit circulation desk for physical pickup upon approval
+              </span>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- Section 2: Officially Issued Borrowed Books -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+    <h2 style="font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.02em;">Currently Borrowed Books</h2>
+    <a href="/history" class="btn btn-ghost btn-sm">
+      <span>View Past History</span>
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  </div>
+
+  <% if (loans.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-state-icon" aria-hidden="true">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      </div>
+      <h3 class="empty-state-title">No books currently on loan</h3>
+      <p class="empty-state-desc">You don't have any books checked out right now. Browse our library catalogue to submit a borrow request.</p>
+      <a href="/books" class="btn btn-primary btn-md">Browse Catalogue</a>
+    </div>
+  <% } else { %>
+    <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+      <% loans.forEach(loan => { %>
+        <%
+          const isOverdue = loan.status === 'OVERDUE';
+          const totalDurationDays = typeof config !== 'undefined' ? config.loanDurationDays : 14;
+          const diffMs = new Date(loan.dueDate) - new Date();
+          const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          const percentElapsed = Math.min(100, Math.max(0, Math.round(((totalDurationDays - daysLeft) / totalDurationDays) * 100)));
+          const fillClass = isOverdue ? 'danger' : (daysLeft <= 3 ? 'warning' : 'safe');
+        %>
+        <div class="card" style="padding: var(--space-6);" id="loan-<%= loan._id %>">
+          <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+            <div style="display: flex; gap: var(--space-5); align-items: flex-start;">
+              <!-- Cover image -->
+              <div class="loan-card-cover" style="width: 72px; height: 96px;">
+                <img
+                  src="<%= (loan.book && loan.book.coverImage) || (typeof h !== 'undefined' ? h.getPlaceholderCover(loan.book ? loan.book.title : 'Book') : '') %>"
+                  alt="Cover image"
+                  loading="lazy"
+                >
+              </div>
+
+              <!-- Main Book Info -->
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: 4px;">
+                  <h3 style="font-size: var(--text-lg); font-weight: 700; color: var(--text); margin: 0;">
+                    <% if (loan.book) { %>
+                      <a href="/books/<%= loan.book._id %>"><%= loan.book.title %></a>
+                    <% } else { %>
+                      Unknown Book
+                    <% } %>
+                  </h3>
+                  <span class="badge <%= isOverdue ? 'badge-danger' : 'badge-primary' %>">
+                    <span class="badge-dot"></span> <%= loan.status %>
+                  </span>
+                </div>
+                <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-3);">
+                  by <%= loan.book ? loan.book.author : 'Unknown Author' %>
+                </p>
+
+                <!-- Dates Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); background-color: var(--surface-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-xs);">
+                  <div>
+                    <span style="color: var(--text-muted); display: block;">Issued Date</span>
+                    <strong style="color: var(--text); font-size: var(--text-sm);"><%= typeof h !== 'undefined' ? h.formatDate(loan.issuedAt) : new Date(loan.issuedAt).toLocaleDateString() %></strong>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted); display: block;">Return Due Date</span>
+                    <strong style="font-size: var(--text-sm); <%= isOverdue ? 'color: var(--danger);' : 'color: var(--text);' %>">
+                      <%= typeof h !== 'undefined' ? h.formatDate(loan.dueDate) : new Date(loan.dueDate).toLocaleDateString() %>
+                    </strong>
+                  </div>
+                  <% if (isOverdue) { %>
+                    <div>
+                      <span style="color: var(--danger); display: block;">Days Overdue</span>
+                      <strong style="color: var(--danger); font-size: var(--text-sm);"><%= loan.daysOverdue %> days</strong>
+                    </div>
+                    <div>
+                      <span style="color: var(--danger); display: block;">Accumulated Fine</span>
+                      <strong style="color: var(--danger); font-size: var(--text-sm);">₹<%= loan.calculatedFine %></strong>
+                    </div>
+                  <% } else { %>
+                    <div>
+                      <span style="color: var(--text-muted); display: block;">Time Left</span>
+                      <strong style="color: var(--text); font-size: var(--text-sm);"><%= daysLeft %> day<%= daysLeft !== 1 ? 's' : '' %></strong>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Due Date Progress Bar -->
+            <div class="due-progress-wrapper">
+              <div class="due-progress-track">
+                <div class="due-progress-fill <%= fillClass %>" style="width: <%= isOverdue ? 100 : percentElapsed %>%;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-muted);">
+                <span><%= totalDurationDays %>-day borrowing duration</span>
+                <span>
+                  <% if (isOverdue) { %>
+                    <span style="color: var(--danger); font-weight: 600;">Overdue by <%= loan.daysOverdue %> days</span>
+                  <% } else { %>
+                    <span><%= daysLeft %> day<%= daysLeft !== 1 ? 's' : '' %> remaining</span>
+                  <% } %>
+                </span>
+              </div>
+            </div>
+
+            <!-- Informational Return Guidance (NO return button) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: var(--space-3); gap: var(--space-4); flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: var(--text-xs);">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Please return this physical book to the librarian at the circulation desk before the due date.</span>
+              </div>
+              <div>
+                <span class="badge badge-outline" style="font-size: var(--text-xs); color: var(--text-secondary);">
+                  Librarian Return Only
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>

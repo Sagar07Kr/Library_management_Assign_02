@@ -1,0 +1,277 @@
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/admin">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <span>Admin Console</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page">Borrow Requests</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-6);">
+    <div>
+      <h1 style="font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;">Pending Borrow Requests</h1>
+      <p style="color: var(--text-muted); font-size: var(--text-base);">
+        Librarian approval queue. Review member quotas and inventory availability before officially issuing books (<%= pagination.total %> pending).
+      </p>
+    </div>
+    <div>
+      <a href="/admin/loans" class="btn btn-secondary btn-md">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span>View Active Loans</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Policy Reminder Card -->
+  <div class="card" style="margin-bottom: var(--space-6); background-color: var(--surface-2); padding: var(--space-4) var(--space-6); border-left: 4px solid var(--primary);">
+    <div style="display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm);">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--primary); flex-shrink: 0;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span style="color: var(--text-secondary);">
+        <strong>Librarian Workflow:</strong> Clicking <em>Approve & Issue</em> officially assigns the book to the member, decrements physical stock by 1, and starts the <%= typeof config !== 'undefined' ? config.loanDurationDays : 14 %>-day return countdown.
+      </span>
+    </div>
+  </div>
+
+  <!-- Requests Data Table -->
+  <% if (requests.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-state-icon" aria-hidden="true">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="empty-state-title">No pending requests</h2>
+      <p class="empty-state-desc">All member book requests have been reviewed and processed. The queue is currently empty.</p>
+      <a href="/admin/loans" class="btn btn-primary btn-md">Check Active Loans</a>
+    </div>
+  <% } else { %>
+    <div class="table-wrapper">
+      <table class="table" aria-label="Pending borrow requests list">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Requested Book</th>
+            <th>Stock Available</th>
+            <th>Member Quota</th>
+            <th>Requested At</th>
+            <th>Status</th>
+            <th style="text-align: right;">Circulation Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(req => { %>
+            <%
+              const bookAvailable = req.book && req.book.availableCopies > 0;
+              const quotaAvailable = req.memberActiveLoans < req.maxActiveLoans;
+              const canApprove = bookAvailable && quotaAvailable;
+              const memberName = req.member ? req.member.fullName : 'Member';
+              const bookTitle = req.book ? req.book.title : 'Book';
+            %>
+            <tr id="request-<%= req._id %>">
+              <!-- Member Info -->
+              <td>
+                <div style="display: flex; align-items: center; gap: var(--space-3);">
+                  <div class="user-avatar" style="width: 36px; height: 36px; font-size: var(--text-xs);" aria-hidden="true">
+                    <%= (req.member && req.member.fullName) ? req.member.fullName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'M' %>
+                  </div>
+                  <div>
+                    <strong style="display: block; color: var(--text);">
+                      <%= req.member ? req.member.fullName : 'Deleted Member' %>
+                    </strong>
+                    <span style="font-size: var(--text-xs); color: var(--text-muted);">
+                      <%= req.member ? req.member.email : 'N/A' %>
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Book Info -->
+              <td>
+                <div style="display: flex; align-items: center; gap: var(--space-3);">
+                  <div class="loan-card-cover" style="width: 36px; height: 48px; border-radius: var(--radius-sm);">
+                    <img
+                      src="<%= (req.book && req.book.coverImage) || (typeof h !== 'undefined' ? h.getPlaceholderCover(req.book ? req.book.title : 'Book') : '') %>"
+                      alt=""
+                      loading="lazy"
+                    >
+                  </div>
+                  <div>
+                    <strong style="display: block; color: var(--text); font-size: var(--text-sm);">
+                      <% if (req.book) { %>
+                        <a href="/books/<%= req.book._id %>"><%= req.book.title %></a>
+                      <% } else { %>
+                        Unknown Book
+                      <% } %>
+                    </strong>
+                    <span style="font-size: var(--text-xs); color: var(--text-muted);">
+                      by <%= req.book ? req.book.author : 'Unknown' %>
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Stock Availability -->
+              <td>
+                <% if (req.book) { %>
+                  <% if (req.book.availableCopies > 0) { %>
+                    <span class="badge badge-success">
+                      <span class="badge-dot"></span> <%= req.book.availableCopies %> in stock
+                    </span>
+                  <% } else { %>
+                    <span class="badge badge-danger">
+                      <span class="badge-dot"></span> 0 available
+                    </span>
+                  <% } %>
+                <% } else { %>
+                  <span style="color: var(--text-muted); font-size: var(--text-xs);">N/A</span>
+                <% } %>
+              </td>
+
+              <!-- Member Quota -->
+              <td>
+                <div style="font-size: var(--text-sm);">
+                  <strong style="<%= !quotaAvailable ? 'color: var(--danger);' : 'color: var(--text);' %>">
+                    <%= req.memberActiveLoans %>
+                  </strong>
+                  <span style="color: var(--text-muted); font-size: var(--text-xs);"> / <%= req.maxActiveLoans %> active</span>
+                </div>
+                <% if (!quotaAvailable) { %>
+                  <span style="font-size: var(--text-xs); color: var(--danger); display: block;">Limit reached</span>
+                <% } %>
+              </td>
+
+              <!-- Request Date -->
+              <td style="font-size: var(--text-xs); color: var(--text-muted);">
+                <%= typeof h !== 'undefined' ? h.formatDate(req.requestedAt) : new Date(req.requestedAt).toLocaleDateString() %>
+              </td>
+
+              <!-- Status -->
+              <td>
+                <span class="badge badge-warning">
+                  <span class="badge-dot"></span> PENDING
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td style="text-align: right;">
+                <div style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                  <!-- Approve & Issue Button -->
+                  <% if (canApprove) { %>
+                    <form action="/admin/requests/<%= req._id %>/approve" method="POST" data-loading style="margin: 0;">
+                      <button
+                        type="submit"
+                        class="btn btn-primary btn-sm"
+                        id="approve-btn-<%= req._id %>"
+                      >
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Approve & Issue</span>
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      disabled
+                      title="<%= !bookAvailable ? 'Book is out of stock' : 'Member has reached their borrowing limit' %>"
+                      style="opacity: 0.5; cursor: not-allowed;"
+                    >
+                      <span>Cannot Issue</span>
+                    </button>
+                  <% } %>
+
+                  <!-- Reject Button -->
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm btn-reject-request"
+                    style="color: var(--danger);"
+                    data-id="<%= req._id %>"
+                    data-book="<%= bookTitle %>"
+                    data-member="<%= memberName %>"
+                  >
+                    <span>Reject</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (pagination && pagination.totalPages > 1) { %>
+      <%- include('../partials/pagination', { pagination, query: {} }) %>
+    <% } %>
+  <% } %>
+</div>
+
+<!-- Reject Request Modal Dialog -->
+<div id="reject-modal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 999; align-items: center; justify-content: center;">
+  <div class="card" style="width: 100%; max-width: 480px; margin: var(--space-4); padding: var(--space-6); background: var(--surface);">
+    <h3 style="font-size: var(--text-lg); font-weight: 800; color: var(--text); margin-bottom: var(--space-2);">
+      Reject Borrow Request
+    </h3>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4);" id="reject-modal-desc">
+      Are you sure you want to decline this request?
+    </p>
+
+    <form id="reject-form" method="POST">
+      <div class="form-group" style="margin-bottom: var(--space-5);">
+        <label class="form-label" for="reject-reason">Reason for rejection (optional):</label>
+        <input
+          type="text"
+          id="reject-reason"
+          name="reason"
+          class="form-control"
+          placeholder="e.g., Physical copy under repair, verification needed..."
+        >
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3);">
+        <button type="button" class="btn btn-ghost btn-md" id="close-reject-modal-btn">
+          <span>Cancel</span>
+        </button>
+        <button type="submit" class="btn btn-danger btn-md">
+          <span>Confirm Rejection</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const rejectModal = document.getElementById('reject-modal');
+    const rejectForm = document.getElementById('reject-form');
+    const rejectDesc = document.getElementById('reject-modal-desc');
+    const closeBtn = document.getElementById('close-reject-modal-btn');
+
+    document.querySelectorAll('.btn-reject-request').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const reqId = btn.getAttribute('data-id');
+        const bookTitle = btn.getAttribute('data-book');
+        const memberName = btn.getAttribute('data-member');
+        rejectForm.action = '/admin/requests/' + reqId + '/reject';
+        rejectDesc.textContent = 'Decline borrow request for "' + bookTitle + '" submitted by ' + memberName + '.';
+        rejectModal.style.display = 'flex';
+      });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        rejectModal.style.display = 'none';
+      });
+    }
+  });
+</script>

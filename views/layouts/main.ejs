@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <!-- Header / Navigation Bar -->
+  <%- include('../partials/navbar') %>
+
+  <!-- Flash Messages / Toast Container -->
+  <%- include('../partials/flash-messages') %>
+
+  <!-- Global Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Confirm Deletion</h3>
+        <button type="button" class="modal-close" data-dismiss="modal" aria-label="Close dialog">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to remove <strong class="modal-item-name" style="color: var(--text);">this item</strong>? This action cannot be reversed.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+        <form id="delete-form" method="POST" style="display:inline; margin:0;">
+          <button type="submit" class="btn btn-danger btn-sm">Yes, Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary Main Page Content -->
+  <main class="main-content" role="main">
+    <%- body %>
+  </main>
+
+  <!-- Global Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Core Client JavaScript (Theme, Dropdown, Modals, Forms) -->
+  <script src="/js/main.js"></script>
+  <script src="/js/forms.js"></script>
+</body>
+</html>

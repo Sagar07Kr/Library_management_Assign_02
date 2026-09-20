@@ -1,0 +1,108 @@
+<div class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/dashboard">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <span class="separator" aria-hidden="true">/</span>
+    <span class="current" aria-current="page">Borrowing History</span>
+  </nav>
+
+  <!-- Header -->
+  <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-8);">
+    <h1 style="font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;">Borrowing History</h1>
+    <p style="color: var(--text-muted); font-size: var(--text-base);">
+      Comprehensive log of all <%= pagination.total %> loans and returns recorded on your membership.
+    </p>
+  </div>
+
+  <% if (loans.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-state-icon" aria-hidden="true">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="empty-state-title">No historical records yet</h2>
+      <p class="empty-state-desc">When you borrow and return books, your complete circulation ledger will be archived here.</p>
+      <a href="/books" class="btn btn-primary btn-md">Browse Catalogue</a>
+    </div>
+  <% } else { %>
+    <div class="card" style="overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Book Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">Issued</th>
+              <th scope="col">Due Date</th>
+              <th scope="col">Returned</th>
+              <th scope="col">Status</th>
+              <th scope="col">Fine</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% loans.forEach(loan => { %>
+              <%
+                let badgeClass = 'badge-primary';
+                if (loan.status === 'RETURNED') badgeClass = 'badge-success';
+                else if (loan.status === 'OVERDUE') badgeClass = 'badge-danger';
+                else if (loan.status === 'CANCELLED') badgeClass = 'badge-secondary';
+              %>
+              <tr>
+                <td>
+                  <% if (loan.book) { %>
+                    <a href="/books/<%= loan.book._id %>" style="font-weight: 600; color: var(--text);">
+                      <%= loan.book.title %>
+                    </a>
+                  <% } else { %>
+                    <span style="color: var(--text-muted); font-style: italic;">Archived Book</span>
+                  <% } %>
+                </td>
+                <td style="color: var(--text-muted);"><%= loan.book ? loan.book.author : '—' %></td>
+                <td><%= typeof h !== 'undefined' ? h.formatDate(loan.issuedAt) : new Date(loan.issuedAt).toLocaleDateString() %></td>
+                <td><%= typeof h !== 'undefined' ? h.formatDate(loan.dueDate) : new Date(loan.dueDate).toLocaleDateString() %></td>
+                <td>
+                  <% if (loan.returnedAt) { %>
+                    <%= typeof h !== 'undefined' ? h.formatDate(loan.returnedAt) : new Date(loan.returnedAt).toLocaleDateString() %>
+                  <% } else { %>
+                    <span style="color: var(--text-muted);">In circulation</span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge <%= badgeClass %>">
+                    <span class="badge-dot"></span> <%= loan.status %>
+                  </span>
+                </td>
+                <td>
+                  <% if (loan.fineAmount > 0) { %>
+                    <span style="font-weight: 700; color: var(--danger);">₹<%= loan.fineAmount %></span>
+                  <% } else { %>
+                    <span style="color: var(--text-muted);">₹0</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <% if (pagination.totalPages > 1) { %>
+      <%
+        const paginationData = {
+          page: pagination.page,
+          pages: pagination.totalPages,
+          hasPrev: pagination.page > 1,
+          hasNext: pagination.page < pagination.totalPages,
+        };
+      %>
+      <%- include('../partials/pagination', { pagination: paginationData, query: {} }) %>
+    <% } %>
+  <% } %>
+</div>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <%- include('partials/head', { title: 'LibraryMS — Modern Digital Library & Lending Platform' }) %>
+</head>
+<body>
+  <!-- Global Navigation Header -->
+  <%- include('partials/navbar') %>
+
+  <!-- Flash Messages / Toast Container -->
+  <%- include('partials/flash-messages') %>
+
+  <main class="main-content" role="main">
+    <!-- Hero Section -->
+    <section class="hero-section" aria-label="Hero Section">
+      <div class="container">
+        <!-- Floating Announcement Badge -->
+        <div class="hero-badge">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          <span>Modern Digital Library System 2.0</span>
+        </div>
+
+        <!-- Headline & Value Prop -->
+        <h1 class="hero-title">
+          Smart Book Lending & Catalogue Intelligence for <span class="hero-gradient-text">Modern Readers.</span>
+        </h1>
+        <p class="hero-lead">
+          Explore curated literature, reserve titles with real-time inventory checks, automate due dates, and track your reading journey — all within one cohesive workspace.
+        </p>
+
+        <!-- Prominent Hero Search Form -->
+        <div class="hero-search-wrapper">
+          <form action="/books" method="GET" class="hero-search-form" role="search">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); margin-right: 12px;" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="search" name="q" placeholder="Search by title, author, category or ISBN..." aria-label="Search library catalogue">
+            <button type="submit" class="btn btn-primary btn-md">
+              <span>Find Books</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- CTA Buttons Group -->
+        <div class="hero-cta-group">
+          <a href="/books" class="btn btn-primary btn-lg">
+            <span>Browse Full Catalogue</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+          <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+            <a href="/dashboard" class="btn btn-secondary btn-lg">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span>Go to Dashboard</span>
+            </a>
+          <% } else { %>
+            <a href="/register" class="btn btn-secondary btn-lg">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              <span>Create Free Account</span>
+            </a>
+          <% } %>
+        </div>
+
+        <!-- Live Stats Strip -->
+        <div class="stats-strip" aria-label="Key Library Metrics">
+          <!-- Stat 1 -->
+          <div class="stat-item">
+            <div class="stat-icon-wrap" style="background-color: var(--primary-soft); color: var(--primary);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div>
+              <p class="stat-number">20+ Titles</p>
+              <p class="stat-label">In Active Circulation</p>
+            </div>
+          </div>
+
+          <!-- Stat 2 -->
+          <div class="stat-item">
+            <div class="stat-icon-wrap" style="background-color: var(--accent-soft); color: var(--accent);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="stat-number">500+ Members</p>
+              <p class="stat-label">Registered Readers</p>
+            </div>
+          </div>
+
+          <!-- Stat 3 -->
+          <div class="stat-item">
+            <div class="stat-icon-wrap" style="background-color: var(--success-soft); color: var(--success);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="stat-number">100% Digital</p>
+              <p class="stat-label">Automated Overdue Tracking</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Categories Section -->
+    <section class="landing-section" style="background-color: var(--surface-2);" id="categories" aria-label="Browse by Category">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Curated Collections</p>
+          <h2 class="section-title">Explore by Domain</h2>
+          <p class="section-subtitle">
+            From cutting-edge computer science to timeless literature, explore our diverse selection curated for continuous growth.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <!-- Category 1 -->
+          <a href="/books?category=Programming" class="category-card">
+            <div class="category-icon-box">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="category-title">Programming</h3>
+              <p class="category-count">Architecture & Code</p>
+            </div>
+          </a>
+
+          <!-- Category 2 -->
+          <a href="/books?category=Computer+Science" class="category-card">
+            <div class="category-icon-box" style="background-color: var(--accent-soft); color: var(--accent);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="category-title">Computer Science</h3>
+              <p class="category-count">Algorithms & Systems</p>
+            </div>
+          </a>
+
+          <!-- Category 3 -->
+          <a href="/books?category=Fiction" class="category-card">
+            <div class="category-icon-box" style="background-color: var(--warning-soft); color: var(--warning);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="category-title">Fiction & Novels</h3>
+              <p class="category-count">World Classics</p>
+            </div>
+          </a>
+
+          <!-- Category 4 -->
+          <a href="/books?category=Business" class="category-card">
+            <div class="category-icon-box" style="background-color: var(--success-soft); color: var(--success);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="category-title">Business & Strategy</h3>
+              <p class="category-count">Startups & Mindset</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popular / New Arrivals Section -->
+    <section class="landing-section" id="new-arrivals" aria-label="New Arrivals">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Featured Titles</p>
+          <h2 class="section-title">New Arrivals & Bestsellers</h2>
+          <p class="section-subtitle">
+            Recently added to the circulation desk. Check current availability and borrow instantly.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <!-- Featured Book 1 -->
+          <article class="book-card card-hover">
+            <div class="book-cover-container">
+              <img src="https://placehold.co/300x400/4f46e5/ffffff?text=Clean+Code" alt="Clean Code" class="book-cover-img" loading="lazy">
+              <div class="book-badge-overlay">
+                <span class="badge badge-success"><span class="badge-dot"></span> Available</span>
+              </div>
+              <div class="book-card-actions">
+                <a href="/books" class="btn btn-secondary btn-sm">View Details</a>
+              </div>
+            </div>
+            <div class="book-card-info">
+              <span class="book-category">Programming</span>
+              <h3 class="book-title"><a href="/books">Clean Code</a></h3>
+              <p class="book-author">by Robert C. Martin</p>
+              <div class="book-card-footer">
+                <span>ISBN: 978-0132350884</span>
+                <span>2008</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Featured Book 2 -->
+          <article class="book-card card-hover">
+            <div class="book-cover-container">
+              <img src="https://placehold.co/300x400/2563eb/ffffff?text=Algorithms" alt="Introduction to Algorithms" class="book-cover-img" loading="lazy">
+              <div class="book-badge-overlay">
+                <span class="badge badge-success"><span class="badge-dot"></span> Available</span>
+              </div>
+              <div class="book-card-actions">
+                <a href="/books" class="btn btn-secondary btn-sm">View Details</a>
+              </div>
+            </div>
+            <div class="book-card-info">
+              <span class="book-category">Computer Science</span>
+              <h3 class="book-title"><a href="/books">Introduction to Algorithms</a></h3>
+              <p class="book-author">by Thomas H. Cormen</p>
+              <div class="book-card-footer">
+                <span>ISBN: 978-0262033848</span>
+                <span>2009</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Featured Book 3 -->
+          <article class="book-card card-hover">
+            <div class="book-cover-container">
+              <img src="https://placehold.co/300x400/0891b2/ffffff?text=Atomic+Habits" alt="Atomic Habits" class="book-cover-img" loading="lazy">
+              <div class="book-badge-overlay">
+                <span class="badge badge-success"><span class="badge-dot"></span> Available</span>
+              </div>
+              <div class="book-card-actions">
+                <a href="/books" class="btn btn-secondary btn-sm">View Details</a>
+              </div>
+            </div>
+            <div class="book-card-info">
+              <span class="book-category">Self-Help</span>
+              <h3 class="book-title"><a href="/books">Atomic Habits</a></h3>
+              <p class="book-author">by James Clear</p>
+              <div class="book-card-footer">
+                <span>ISBN: 978-0735211292</span>
+                <span>2018</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Featured Book 4 -->
+          <article class="book-card card-hover">
+            <div class="book-cover-container">
+              <img src="https://placehold.co/300x400/7c3aed/ffffff?text=Design+Patterns" alt="Design Patterns" class="book-cover-img" loading="lazy">
+              <div class="book-badge-overlay">
+                <span class="badge badge-success"><span class="badge-dot"></span> Available</span>
+              </div>
+              <div class="book-card-actions">
+                <a href="/books" class="btn btn-secondary btn-sm">View Details</a>
+              </div>
+            </div>
+            <div class="book-card-info">
+              <span class="book-category">Programming</span>
+              <h3 class="book-title"><a href="/books">Design Patterns</a></h3>
+              <p class="book-author">by Erich Gamma</p>
+              <div class="book-card-footer">
+                <span>ISBN: 978-0201633610</span>
+                <span>1994</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div style="text-align: center; margin-top: var(--space-10);">
+          <a href="/books" class="btn btn-outline btn-md">
+            <span>Explore All 20+ Titles</span>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="landing-section" style="background-color: var(--surface-2);" id="how-it-works" aria-label="How it works">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Effortless Workflow</p>
+          <h2 class="section-title">How LibraryMS Works</h2>
+          <p class="section-subtitle">
+            A transparent, frictionless 3-step process designed for students, faculty, and avid readers.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <!-- Step 1 -->
+          <div class="step-card">
+            <div class="step-badge">1</div>
+            <h3 class="step-title">Create an Account</h3>
+            <p class="step-desc">
+              Sign up in seconds with your name and email. Access your personal lending dashboard instantly with zero registration fees.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <div class="step-badge">2</div>
+            <h3 class="step-title">Select & Borrow</h3>
+            <p class="step-desc">
+              Search by title, author, or ISBN. Check real-time stock and borrow up to 5 books concurrently for a generous 14-day duration.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <div class="step-badge">3</div>
+            <h3 class="step-title">Track & Return</h3>
+            <p class="step-desc">
+              Monitor due dates with automated countdown bars. Return with one click to keep your account in good standing without overdue fines.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom CTA Banner -->
+    <section class="landing-section" style="background: var(--hero-gradient); color: #FFFFFF; text-align: center;">
+      <div class="container" style="max-width: 720px;">
+        <h2 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: #FFFFFF; margin-bottom: var(--space-4); letter-spacing: -0.03em;">
+          Start Your Reading Adventure Today
+        </h2>
+        <p style="font-size: var(--text-lg); color: rgba(255, 255, 255, 0.9); margin-bottom: var(--space-8); line-height: 1.6;">
+          Join the modern digital library that puts books directly in your hands. Free membership, zero hassle.
+        </p>
+        <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
+          <a href="/register" class="btn btn-secondary btn-lg" style="color: var(--primary); font-weight: 700;">
+            <span>Get Started Free</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+          <a href="/books" class="btn btn-outline btn-lg" style="color: #FFFFFF; border-color: rgba(255, 255, 255, 0.4);">
+            <span>Browse Books</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <%- include('partials/footer') %>
+
+  <!-- Scripts -->
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+/* =====================================================
+   RESPONSIVE DESIGN — Breakpoint Overrides
+   ===================================================== */
+
+/* ---- Tablet: <= 1024px ---- */
+@media (max-width: 1024px) {
+  .book-grid { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .book-detail { grid-template-columns: 240px 1fr; gap: var(--space-6); }
+  .form-row { grid-template-columns: 1fr; }
+  .main-content { padding: var(--space-6); }
+}
+
+/* ---- Small Tablet: <= 768px ---- */
+@media (max-width: 768px) {
+  .book-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+
+  .navbar-nav { display: none; }
+  .navbar-user-info { display: none; }
+  .mobile-menu-btn { display: flex; }
+
+  .navbar-nav.mobile-open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-lg);
+    z-index: 99;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .book-detail {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .book-detail-cover {
+    max-width: 260px;
+    margin: 0 auto;
+  }
+
+  .book-detail-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .filter-group, .search-input-wrapper {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .page-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .loan-card {
+    flex-direction: column;
+  }
+
+  .loan-card-cover {
+    width: 100%;
+    height: 120px;
+  }
+
+  .loan-card-actions {
+    align-self: stretch;
+  }
+
+  .loan-card-actions .btn {
+    flex: 1;
+  }
+
+  .loan-card-dates {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: center;
+  }
+
+  .table-container {
+    border-radius: var(--radius-lg);
+  }
+
+  /* Responsive table: horizontal scroll */
+  .table th, .table td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .auth-card {
+    padding: var(--space-6);
+  }
+
+  .modal {
+    margin: var(--space-4);
+  }
+
+  .toast-container {
+    right: var(--space-3);
+    left: var(--space-3);
+    max-width: none;
+  }
+
+  .main-content {
+    padding: var(--space-4);
+  }
+}
+
+/* ---- Mobile: <= 480px ---- */
+@media (max-width: 480px) {
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: var(--space-4);
+  }
+
+  .stat-value {
+    font-size: var(--font-size-xl);
+  }
+
+  h1 { font-size: var(--font-size-2xl); }
+  h2 { font-size: var(--font-size-xl); }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
+
+  .tabs {
+    gap: 0;
+  }
+
+  .tab-link {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .error-code {
+    font-size: 4rem;
+  }
+
+  .navbar {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ---- Print ---- */
+@media print {
+  .navbar, .footer, .toast-container, .modal-overlay {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  .card, .stat-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
